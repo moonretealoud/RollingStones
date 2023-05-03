@@ -1,21 +1,26 @@
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading.Tasks;
+using System;
 
 public class BallsSpawn : GameController
 {
     [Header("set myself")]
     public float idleDelay = 5f;
     public float waveDelay = 1f;
-    public static float waves = 4;
+    public static float waves = 8;
+
     public GameObject prefabBall;
     public Text uitWavesCountInfo;
+    public GameObject explodePrefab;
 
     private const float padding = 2.0f;
 
     [Header("set dynamically")]
     private float waveCounter;
     private int q, last, preLast;
-    private bool stillRolling = false;
+    public static bool stillRolling = false;
     public static GameMode gameMode;
     private float ballsInARow = 0;
 
@@ -25,12 +30,13 @@ public class BallsSpawn : GameController
         set { transform.position = value; }
     }
 
-    //private void SetTimeout(Func<bool> function, int timeout)
+    //private void SetTimeout(Func<GameObject> function, int timeout)
     //{
     //    Task.Delay(timeout).ContinueWith((Task task) => function());
     //}
+
     void Awake()
-    {
+    {   
         waveCounter = waves;
         gameMode = GameMode.idle;
     }
@@ -48,10 +54,7 @@ public class BallsSpawn : GameController
         if (UIMain.curLife <= 0)
         {
             MovementRealize.canMove = false;
-            stillRolling = false;
             gameMode = GameMode.endGame;
-            waveCounter = 4;
-            Invoke(nameof(RestartGame), 8f);
         }
     }
 
@@ -67,45 +70,44 @@ public class BallsSpawn : GameController
 
         waveCounter--;
         QueueRand();
-
+        
         for (float i = 0; i < 40; i += padding)
         {
-            GameObject go = Instantiate(prefabBall);
-            go.transform.position = transform.position;
+            GameObject ball = Instantiate(prefabBall);
+            ball.transform.position = transform.position;
             Vector3 pos = Vector3.zero;
             switch (q)
             {
                 case 1:
-                    pos.x = i;
-                    pos.y = 1;
-                    pos.z = -2;
+                    pos = new Vector3(i, 1, -2);
                     break;
                 case 2:
-                    pos.x = -2;
-                    pos.y = 1;
-                    pos.z = i;
+                    pos = new Vector3(-2, 1, i);
                     break;
                 case 3:
-                    pos.x = i;
-                    pos.y = 1;
-                    pos.z = 40;
+                    pos = new Vector3(i, 1, 40);
                     break;
                 case 4:
-                    pos.x = 40;
-                    pos.y = 1;
-                    pos.z = i;
+                    pos = new Vector3(40, 1, i);
                     break;
             }
 
-            go.transform.position = pos;
+            ball.transform.position = pos;
 
-            //уничтожить шар с вероятностью 20-30% через 0.5-1.5 секунд либо гарантированно если образовался ряд из 7 шаров
-            if (Random.Range(0, 101) > Random.Range(70, 85) || ballsInARow > 7)
+            //уничтожить шар с вероятностью 15-30% через 0.5-2 секунды либо гарантированно если образовался ряд из 6 шаров
+            if (UnityEngine.Random.Range(0, 101) > UnityEngine.Random.Range(80, 90) || ballsInARow > 5)
             {
                 ballsInARow = 0;
-                float Delay = Random.Range(0.5f, 1.5f);
-                Destroy(go, Delay);
-            } else
+                float Delay = UnityEngine.Random.Range(0.5f, 2f) * 1000;
+                int del = (int)Delay;
+
+                BoomVFX(ball, del);
+
+                Destroy(ball, Delay/1000);
+                
+                
+            }
+            else
             {
                 ballsInARow++;
             }
@@ -127,7 +129,7 @@ public class BallsSpawn : GameController
     //рандом генерация очереди направления волн
     void QueueRand()
     {
-        q = Random.Range(1, 5);
+        q = UnityEngine.Random.Range(1, 5);
         if (q == last || q == preLast)
         {
             QueueRand();
@@ -150,4 +152,18 @@ public class BallsSpawn : GameController
         uitWavesCountInfo.text = "Waves: " + waves;
     }
 
+    public async void BoomVFX(GameObject ball, int del)
+    {
+        await Task.Delay(del-100);
+        try
+        {
+            GameObject boomVFX = Instantiate(explodePrefab, ball.transform.position, ball.transform.rotation);
+            Destroy(boomVFX, 2);
+        }
+        catch 
+        {
+            print("ball был рано сломан");
+        }
+        return;
+    }
 }

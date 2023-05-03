@@ -3,13 +3,13 @@
 
 public class MovementRealize : MonoBehaviour
 {
-    [SerializeField]
+
     public static bool dashIsReady = false;
     // Movement variables
     private const float heroMoveSpeed = 6.3f;
     [SerializeField]
-    private float dashRange = 5f;
-    public static float dashCD = 5f;
+    private float dashRange = 6f;
+    public static float dashCD = 3f;
 
     // Animation Script
     private CharacterAnimation anim;
@@ -22,7 +22,8 @@ public class MovementRealize : MonoBehaviour
     public static float speedMultiplier = 1.0f;
     public static bool wasDamaged = false;
     public static float dashCDTimer;
-    
+
+    public GameObject blinkSmoke;
 
     public static bool canMove = true;
 
@@ -62,11 +63,17 @@ public class MovementRealize : MonoBehaviour
         MovePlayer();
 
         // Player Move function
-        if (Input.GetMouseButton(0)) // If left mouse button is clicked or held down
+        if (Input.GetButton("Jump") && UIMain.dashAviable) // If left mouse button is clicked or held down
         {
             RotatePlayer(); // Player Rotate function
+            Invoke(nameof(BlinkPlayer), 0.02f);
+        } else if (Input.GetMouseButton(0))
+        {
+            RotatePlayer();
         }
         //destinationPosition.y = transform.position.y; // Set the destination Y position to your local Y position (allows you to canMove up ramps)
+
+
         destinationDistance = Vector3.Distance(destinationPosition, transform.position); // Distance between the player and where clicked
     }
 
@@ -74,7 +81,8 @@ public class MovementRealize : MonoBehaviour
     {
         if (Input.GetButton("Jump") && UIMain.dashAviable)
         {
-            BlinkPlayer();
+
+            
         }
         if (destinationDistance >= minMove && destinationDistance <= maxMove)// If the distance between the player and clicked is greater than the minimum range and less than the maximum range
         {
@@ -101,6 +109,28 @@ public class MovementRealize : MonoBehaviour
         }
     }
 
+    private void BlinkPlayer()
+    {  
+
+        //if Space toogle and dash ready
+        if (destinationDistance >= minMove && destinationDistance <= maxMove && dashIsReady)
+        {
+            BlinkVFX();
+            //blink forward
+            GetComponent<Rigidbody>().MovePosition(GetComponent<Rigidbody>().position + dashRange * transform.forward);
+            dashCDTimer = Time.time;
+            dashIsReady = false;
+
+            Invoke(nameof(BlinkVFX),0.05f);
+        }
+        else
+        {
+            print("problems or cd: " + (Time.fixedTime - dashCDTimer) % 0.1f);
+        }
+        Debug.DrawLine(destinationPosition, transform.position, Color.cyan); // This draws a line in Scene View so you can see where you've clicked
+       
+    }
+
 
     //проверка на столкновение с игроком
     private void OnTriggerEnter(Collider other)
@@ -114,28 +144,15 @@ public class MovementRealize : MonoBehaviour
 
         if (go.CompareTag("Ball"))
         {
+            GameObject explode = Instantiate(BallDestroyer.vfxExplPrefab);
+            explode.transform.position = transform.position;
+            Destroy(explode, 2);
+
             wasDamaged = true; //истина этой переменной позволяет выполниться условию в UIMain отвечающей за получение урона
             Destroy(go);
+
         }
     }
-
-    private void BlinkPlayer()
-    {
-        //if Space toogle and dash ready
-        if (destinationDistance >= minMove && destinationDistance <= maxMove && dashIsReady)
-        {
-            //blink forward
-            GetComponent<Rigidbody>().MovePosition(GetComponent<Rigidbody>().position + dashRange * transform.forward);
-            dashCDTimer = Time.time;
-            dashIsReady = false;
-        }
-        else
-        {
-            print("problems or cd: " + (Time.fixedTime - dashCDTimer) % 0.1f);
-        }
-        Debug.DrawLine(destinationPosition, transform.position, Color.cyan); // This draws a line in Scene View so you can see where you've clicked
-    }
-
 
     //при пересечении границы арены перемещает обратно к границе арены
     void OutOfBoundsStopper()
@@ -147,4 +164,14 @@ public class MovementRealize : MonoBehaviour
         if (tempPos.z < -1) tempPos.z = -1;
         Current_position = tempPos;
     }
+
+    void BlinkVFX()
+    {
+        GameObject go = Instantiate(blinkSmoke);
+        go.transform.position = transform.position;
+        Destroy(go, 2);
+    }
+
+ 
+
 }

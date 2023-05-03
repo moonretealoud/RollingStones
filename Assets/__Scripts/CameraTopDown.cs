@@ -21,8 +21,7 @@ public class CameraTopDown : MonoBehaviour
 
     void LateUpdate()
     {
-        transform.rotation = Quaternion.Euler(rotate, 45f, 0); // Set the camera's rotation
-        transform.position = player.transform.position + offsetPos; // Set cameras final position     
+        transform.SetPositionAndRotation(player.transform.position + offsetPos, Quaternion.Euler(rotate, 45f, 0)); // Set cameras final position     
         offsetPos = new Vector3(xz, y, xz);//отладка
     }
 }

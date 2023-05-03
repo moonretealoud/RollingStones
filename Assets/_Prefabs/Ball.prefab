@@ -128,5 +128,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 6.3
-  rotSpeed: 0.3
+  rotSpeed: 0.45
   prefabBall: {fileID: 0}
