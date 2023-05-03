@@ -13,7 +13,7 @@ Damage - 400;
 Reward - 2;
 
 Dzen mode:
-Damege - 1;
+Damage - 1;
 Reward - 100;
 
 
