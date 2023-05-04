@@ -113,7 +113,7 @@ public class UIMain : MonoBehaviour
         difChoosen = false;
 
         StreamWriter sw = new(filename);
-        sw.WriteLine(bestScore.ToString());
+        sw.WriteLine(bestScore);
         sw.Close();
     }
 
