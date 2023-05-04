@@ -19,7 +19,7 @@ public class MovementRealize : MonoBehaviour
     private readonly float minMove = 0.5f;
     private readonly float maxMove = 500.0f;
     private GameObject lastTriggerGo = null;
-    public static float speedMultiplier = 1.0f;
+    public static float speedMultiplier = 1.2f;
     public static bool wasDamaged = false;
     public static float dashCDTimer;
 
@@ -63,7 +63,7 @@ public class MovementRealize : MonoBehaviour
         MovePlayer();
 
         // Player Move function
-        if (Input.GetButton("Jump") && UIMain.dashAviable) // If left mouse button is clicked or held down
+        if (Input.GetButton("Jump")) // If left mouse button is clicked or held down
         {
             RotatePlayer(); // Player Rotate function
             Invoke(nameof(BlinkPlayer), 0.02f);
@@ -79,11 +79,6 @@ public class MovementRealize : MonoBehaviour
 
     private void MovePlayer()
     {
-        if (Input.GetButton("Jump") && UIMain.dashAviable)
-        {
-
-            
-        }
         if (destinationDistance >= minMove && destinationDistance <= maxMove)// If the distance between the player and clicked is greater than the minimum range and less than the maximum range
         {
             GetComponent<Rigidbody>().MovePosition(GetComponent<Rigidbody>().position + heroMoveSpeed * speedMultiplier * Time.deltaTime * transform.forward); // Move forward based on players Vector3

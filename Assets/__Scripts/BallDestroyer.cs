@@ -5,7 +5,7 @@ using UnityEngine;
 public class BallDestroyer : MonoBehaviour
 {
     [Header("Set in")]
-    public static float scoreHit = 100;
+    public static int scoreHit = 100;
     public static float reward = 10;
     public GameObject vfxExplode;
     public static GameObject vfxExplPrefab;

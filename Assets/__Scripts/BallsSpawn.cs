@@ -95,7 +95,7 @@ public class BallsSpawn : GameController
             ball.transform.position = pos;
 
             //уничтожить шар с вероятностью 15-30% через 0.5-2 секунды либо гарантированно если образовался ряд из 6 шаров
-            if (UnityEngine.Random.Range(0, 101) > UnityEngine.Random.Range(80, 90) || ballsInARow > 5)
+            if (UnityEngine.Random.Range(0, 101) > 80 || ballsInARow > 5)
             {
                 ballsInARow = 0;
                 float Delay = UnityEngine.Random.Range(0.5f, 2f) * 1000;

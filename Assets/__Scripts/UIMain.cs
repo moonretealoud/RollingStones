@@ -1,20 +1,18 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 public class UIMain : MonoBehaviour
 {
     [Header("---")]
     public static float gold = 0;
-    public float extraMaxLife = 200f;
-    public static bool dashAviable = false;
-    public float speedPrice = 100f;
-    public float dashPrice = 1000f;
-    public float dashCDPrice = 2000;
-    public float maxLifePrice = 1000f;
+    public float healCurrLife = 100f;
+    public float speedPrice = 200f;
+    public float dashCDPrice = 2000f;
+    public float healLifePrice = 100f;
     public float lifeRegenPrice = 500f;
-    public float penalty = 100f;
+    public float penalty = 50f;
 
     public Text uitLife;
     public Text uitGold;
@@ -23,6 +21,7 @@ public class UIMain : MonoBehaviour
     public Text uitGameOver;
     public Text uitMS;
     public Text uitHelp;
+    public Text uitHitScore;
 
     [Header("set dynamically")]
     public static float curLife = 1000.0f;
@@ -30,18 +29,22 @@ public class UIMain : MonoBehaviour
     public static float lifeRegen = 0;
     private float dashCDRemaining;
     private string dashCDRemString;
-    private string regenStr;
+
     private bool shoppingTime = false;
     public static bool refresh = false;
-    public static float score;
+    public static int score;
     public float damageHit = 400;
     private bool difChoosen = false;
 
+    private int hitScore;
+    public string filename;
 
     private void Awake()
     {
+        if (filename == "") filename = "RollingStones_Data/HitScore.tt";
+        StreamReader sr = new(filename);
+        if (sr != null) hitScore = Convert.ToInt32(sr.ReadLine());
         uitGameOver.enabled = false;
-
     }
     void OnGUI()
     {
@@ -56,17 +59,16 @@ public class UIMain : MonoBehaviour
     {
         if (!difChoosen)
         {
-            if (GUI.Button(new Rect((Screen.width /2 - 360), Screen.height / 2 - 20, 160, 40), "Arcade Mode"))
+            if (GUI.Button(new Rect((Screen.width / 2 - 360), Screen.height / 2 - 20, 160, 40), "Arcade Mode"))
             {
                 damageHit = 400;
                 BallDestroyer.scoreHit = 100;
                 BallDestroyer.reward = 2;
                 difChoosen = true;
                 uitHelp.enabled = false;
-
             }
 
-            if (GUI.Button(new Rect((Screen.width / 2 + 200), Screen.height /2 - 20, 160, 40), "Zen Mode"))
+            if (GUI.Button(new Rect((Screen.width / 2 + 200), Screen.height / 2 - 20, 160, 40), "Zen Mode"))
             {
                 damageHit = 1;
                 BallDestroyer.scoreHit = 1;
@@ -93,14 +95,12 @@ public class UIMain : MonoBehaviour
     {
         BallsSpawn.gameMode = GameMode.idle;
         gold = 0;
-        MovementRealize.speedMultiplier = 1;
+        MovementRealize.speedMultiplier = 1.2f;
         MovementRealize.canMove = true;
-        extraMaxLife = 200f;
-        dashAviable = false;
-        speedPrice = 100f;
-        dashPrice = 1000f;
+        healCurrLife = 100f;
+        speedPrice = 200f;
         dashCDPrice = 2000;
-        maxLifePrice = 1000f;
+        healLifePrice = 100f;
         lifeRegenPrice = 500f;
         score = 0;
         lifeRegen = 0;
@@ -111,15 +111,22 @@ public class UIMain : MonoBehaviour
         refresh = false;
         uitGameOver.enabled = false;
         difChoosen = false;
+
+        StreamWriter sw = new(filename);
+        sw.WriteLine(hitScore.ToString());
+        sw.Close();
     }
 
     // Update is called once per frame
     void Upd()
     {
         uitScore.text = score + "pts.";
+        uitHitScore.text = "Hit Score: " + hitScore + " pts.";
         uitGold.text = gold + " •";
-        uitLife.text = "Life: " + (curLife - curLife % 1) + "/" + maxLife + " +" + regenStr + "% p/s";
-        uitMS.text = "Movement speed: " + 100* MovementRealize.speedMultiplier + "%";
+        uitLife.text = "Life: " + (curLife - curLife % 1) + "/" + maxLife + " +" + lifeRegen + "% p/s";
+        uitMS.text = "Movement speed: " + 100 * MovementRealize.speedMultiplier + "%";
+
+        if (score > hitScore && score != 0) hitScore = score;
     }
 
     private void FixedUpdate()
@@ -133,6 +140,8 @@ public class UIMain : MonoBehaviour
         if (curLife <= 0)
         {
             curLife = 0;
+            BallDestroyer.scoreHit = 0;
+
             uitGameOver.enabled = true;
         }
 
@@ -145,7 +154,6 @@ public class UIMain : MonoBehaviour
             if (gold < 0) gold = 0;
         }
 
-        regenStr = String.Format("{0,2:#0.0}", lifeRegen);
 
         //если пошел ресет, нужно обновить переменные до изначальных
         if (refresh) Reseter();
@@ -161,30 +169,23 @@ public class UIMain : MonoBehaviour
 
 
         if (dashCDRemaining <= 0) MovementRealize.dashIsReady = true;
-        if (dashAviable)
+
+        if (MovementRealize.dashIsReady)
         {
-            if (MovementRealize.dashIsReady)
-            {
-                uitDash.color = Color.green;
-                uitDash.text = "Dash ready";
-            }
-            if (!MovementRealize.dashIsReady)
-            {
-                if (dashCDRemaining > 1.5f)
-                {
-                    uitDash.color = Color.red;
-                }
-                else if (dashCDRemaining > 0)
-                {
-                    uitDash.color = Color.yellow;
-                }
-                uitDash.text = "Dash CD " + dashCDRemString + "s.";
-            }
+            uitDash.color = Color.green;
+            uitDash.text = "Dash ready";
         }
-        else
+        if (!MovementRealize.dashIsReady)
         {
-            uitDash.color = Color.red;
-            uitDash.text = "No dash";
+            if (dashCDRemaining > 1.5f)
+            {
+                uitDash.color = Color.red;
+            }
+            else if (dashCDRemaining > 0)
+            {
+                uitDash.color = Color.yellow;
+            }
+            uitDash.text = "Dash CD " + dashCDRemString + "s.";
         }
     }
 
@@ -194,12 +195,13 @@ public class UIMain : MonoBehaviour
 
         //открытие окна магазина
         //повторное нажатие должно закрывать окно магазина
-        if (!shoppingTime) { 
+        if (!shoppingTime)
+        {
             if (GUI.Button(new Rect((Screen.width / 2 - 40), Screen.height - 60, 80, 40), "Shop"))
             {
                 shoppingTime = true;
             }
-        } 
+        }
         else
         {
             if (GUI.Button(new Rect((Screen.width / 2 - 40), Screen.height - 60, 80, 40), "Shop"))
@@ -227,22 +229,24 @@ public class UIMain : MonoBehaviour
                 }
             }
 
-            //покупка возможности делать рывок, и дальнейшее уменьшение КД.
-            GUI.backgroundColor = Color.green;
-            if (!dashAviable)
+            if (MovementRealize.speedMultiplier >= 1.5f)
             {
-                if (GUI.Button(new Rect(Screen.width / 2 + 5, Screen.height - 160, 140, 25), "Dash " + dashPrice + " •")) // if NO is pressed
+                if (GUI.Button(new Rect(Screen.width / 2 - 145, Screen.height - 160, 140, 25), "Max life +100 " + 500 + " •")) // If YES is pressed
                 {
-                    if (gold >= dashPrice)
+                    if (gold >= 500)
                     {
-                        dashAviable = true;
-                        MovementRealize.dashIsReady = true;
-                        gold -= dashPrice;
+                        gold -= 500;
+                        curLife += 100;
+                        maxLife += 100;
                     }
                 }
             }
 
-            if (dashAviable && MovementRealize.dashCD > 1)
+
+            //покупка возможности делать рывок, и дальнейшее уменьшение КД.
+            GUI.backgroundColor = Color.green;
+
+            if (MovementRealize.dashCD > 1)
             {
                 if (GUI.Button(new Rect(Screen.width / 2 + 5, Screen.height - 160, 140, 25), "Dash CD -1s " + dashCDPrice + " •"))
                 {
@@ -255,18 +259,16 @@ public class UIMain : MonoBehaviour
                 }
             }
 
-            //покупка максимального здоровья. Цена как и получаемое здоровье удваиваются после каждой покупки
+            //покупка хила 100 здоровья.
             GUI.backgroundColor = Color.red;
             if (true)
             {
-                if (GUI.Button(new Rect(Screen.width / 2 - 145, Screen.height - 120, 140, 25), "Max life +" + extraMaxLife + " " + maxLifePrice + " •")) // If YES is pressed
+                if (GUI.Button(new Rect(Screen.width / 2 - 145, Screen.height - 120, 140, 25), "Heal " + healCurrLife + " life " + healLifePrice + " •")) // If YES is pressed
                 {
-                    if (gold >= maxLifePrice)
+                    if (gold >= healLifePrice)
                     {
-                        maxLife += extraMaxLife;
-                        gold -= maxLifePrice;
-                        maxLifePrice *= 2;
-                        extraMaxLife *= 2;
+                        curLife += healCurrLife;
+                        gold -= healLifePrice;
                     }
                 }
             }
@@ -274,11 +276,11 @@ public class UIMain : MonoBehaviour
             //покупка регенерации здоровья, аналогично здоровью
             if (true)
             {
-                if (GUI.Button(new Rect(Screen.width / 2 + 5, Screen.height - 120, 140, 25), "Life +0.5% p/s " + lifeRegenPrice + " •"))
+                if (GUI.Button(new Rect(Screen.width / 2 + 5, Screen.height - 120, 140, 25), "Life +1% p/s " + lifeRegenPrice + " •"))
                 {
                     if (gold >= lifeRegenPrice)
                     {
-                        lifeRegen += 0.5f;
+                        lifeRegen += 1f;
                         gold -= lifeRegenPrice;
                         lifeRegenPrice *= 2;
                     }

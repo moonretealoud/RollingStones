@@ -33,7 +33,7 @@ public class LuckArea : MonoBehaviour
 
         if (ball.CompareTag("Ball"))
         {
-            if (UnityEngine.Random.Range(0, 101) > UnityEngine.Random.Range(65, 75))
+            if (UnityEngine.Random.Range(0, 101) > 75)
             {
                 float Delay = UnityEngine.Random.Range(0.5f, 1.5f)*1000;
                 int del = (int)Delay;
