@@ -11,9 +11,10 @@ Spacebar - dash.
 Arcade mode: 
 Damage - 400;
 Reward - 2;
+Score hit - 100;
 
-Dzen mode:
+Zen mode:
 Damage - 1;
 Reward - 100;
-
+Score hit - 1;
 
