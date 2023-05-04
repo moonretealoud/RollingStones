@@ -38,6 +38,7 @@ public class UIMain : MonoBehaviour
 
     private int bestScore;
     public string filename;
+    private bool scoreSaved = false;
 
     private void Awake()
     {
@@ -111,10 +112,7 @@ public class UIMain : MonoBehaviour
         refresh = false;
         uitGameOver.enabled = false;
         difChoosen = false;
-
-        StreamWriter sw = new(filename);
-        sw.WriteLine(bestScore);
-        sw.Close();
+        scoreSaved = false;
     }
 
     // Update is called once per frame
@@ -141,6 +139,8 @@ public class UIMain : MonoBehaviour
         {
             curLife = 0;
             BallDestroyer.scoreHit = 0;
+
+            if (!scoreSaved) ScoreSaver();
 
             uitGameOver.enabled = true;
         }
@@ -287,5 +287,14 @@ public class UIMain : MonoBehaviour
                 }
             }
         }
+    }
+
+    void ScoreSaver()
+    {
+        scoreSaved = true;
+        StreamWriter sw = new(filename, false);
+        sw.WriteLine(bestScore);
+        sw.Close();
+        
     }
 }

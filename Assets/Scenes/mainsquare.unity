@@ -1124,7 +1124,7 @@ MonoBehaviour:
   uitGameOver: {fileID: 1864065010}
   uitMS: {fileID: 293498831}
   uitHelp: {fileID: 869833917}
-  uitHitScore: {fileID: 1663835679}
+  uitBestScore: {fileID: 1663835679}
   damageHit: 400
   filename: 
 --- !u!1 &1027427355
@@ -1491,7 +1491,7 @@ GameObject:
   - component: {fileID: 1663835680}
   - component: {fileID: 1663835679}
   m_Layer: 5
-  m_Name: HitScore_UI
+  m_Name: BestScore_UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1550,7 +1550,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Hit Score: 5466465 pts.'
+  m_Text: 'Best Score: 5466465 pts.'
 --- !u!222 &1663835680
 CanvasRenderer:
   m_ObjectHideFlags: 0
