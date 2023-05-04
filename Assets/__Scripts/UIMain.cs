@@ -21,7 +21,7 @@ public class UIMain : MonoBehaviour
     public Text uitGameOver;
     public Text uitMS;
     public Text uitHelp;
-    public Text uitHitScore;
+    public Text uitBestScore;
 
     [Header("set dynamically")]
     public static float curLife = 1000.0f;
@@ -36,14 +36,14 @@ public class UIMain : MonoBehaviour
     public float damageHit = 400;
     private bool difChoosen = false;
 
-    private int hitScore;
+    private int bestScore;
     public string filename;
 
     private void Awake()
     {
-        if (filename == "") filename = "RollingStones_Data/HitScore.tt";
+        if (filename == "") filename = "RollingStones_Data/BestScore.tt";
         StreamReader sr = new(filename);
-        if (sr != null) hitScore = Convert.ToInt32(sr.ReadLine());
+        if (sr != null) bestScore = Convert.ToInt32(sr.ReadLine());
         uitGameOver.enabled = false;
     }
     void OnGUI()
@@ -113,7 +113,7 @@ public class UIMain : MonoBehaviour
         difChoosen = false;
 
         StreamWriter sw = new(filename);
-        sw.WriteLine(hitScore.ToString());
+        sw.WriteLine(bestScore.ToString());
         sw.Close();
     }
 
@@ -121,12 +121,12 @@ public class UIMain : MonoBehaviour
     void Upd()
     {
         uitScore.text = score + "pts.";
-        uitHitScore.text = "Hit Score: " + hitScore + " pts.";
+        uitBestScore.text = "Best Score: " + bestScore + " pts.";
         uitGold.text = gold + " •";
         uitLife.text = "Life: " + (curLife - curLife % 1) + "/" + maxLife + " +" + lifeRegen + "% p/s";
         uitMS.text = "Movement speed: " + 100 * MovementRealize.speedMultiplier + "%";
 
-        if (score > hitScore && score != 0) hitScore = score;
+        if (score > bestScore && score != 0) bestScore = score;
     }
 
     private void FixedUpdate()
